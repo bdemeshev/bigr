@@ -10,8 +10,13 @@
   # warning("One bear with balalaika and vodka has joined your R session!")
   library("stringi")
   library("stringr")
+  library("stringdist")
   library("reshape2")
   library("dplyr")
+  library("zoo")
+  
+  library("ggplot2")
+  library("erer")
 }
 
 
@@ -32,6 +37,61 @@ rus2num <- function(x) {
   x <- gsub(" ","",x)
   return(as.numeric(x))
 }
+
+
+
+
+#' Standartize character vector 
+#' 
+#' Standartize means: trimming white space at the end and in the beginning,
+#' elimination of punctiation, transliteration, removing capitalization
+#' 
+#' @param x the character vector
+#' @return standartized character vector
+#' @export
+#' @examples
+#' str_stand("пРивет!")
+str_stand <- function(z) {
+  z %>% tolower() %>% str_trim() %>% 
+    stri_trans_general(id = "Russian-Latin/BGN" ) %>% 
+    str_replace_all("[[:punct:]]"," ") %>%
+    str_replace_all(" +"," ") %>% return()  
+}
+
+
+
+
+#' Transliterate cyrillic text
+#'
+#' This function uses the transliteration tradition where "й" goes to "y"
+#' 
+#' @param x the vector of cyrillic characters
+#' @return transliterated vector
+#' @export
+#' @examples
+#' translit("привет")
+translit <- function(x) {
+  return(stri_trans_general(x,"Russian-Latin/BGN"))
+}
+
+
+#' Create base correspondance table from vector of etalon cathegory names
+#'
+#' This function creates basic correspondance table from vector of etalon cathegory names
+#' 
+#' @param x the vector of etalon cathegory names
+#' @return data.frame with basic correspondance table 
+#' @export
+#' @examples
+#' ct_start(c("Iphone","Samsung","HTC"))
+ct_start <- function(etal_cat) {
+  ct <- data.frame(in_cat=etal_cat,out_cat=etal_cat)
+  ct_add <- ct %>% mutate(in_cat=str_stand(in_cat))
+  ct <- rbind_list(ct,ct_add) %>% unique() 
+  return(ct)
+}
+
+
 
 #' Convert excel numeric date encoding to date
 #'
