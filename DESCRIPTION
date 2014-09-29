@@ -1,0 +1,9 @@
+Package: bigr
+Type: Package
+Title: Useful R functions for BIG company.
+Version: 0.1
+Date: 2014-09-29
+Author: Boris Demeshev
+Maintainer: Boris Demeshev <boris.demeshev@gmail.com>
+Description: This package contains functions useful for solving frequent practical tasks of BIG company.
+License: MIT
