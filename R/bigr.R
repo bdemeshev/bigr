@@ -3,7 +3,7 @@
 #' @name bigr
 #' @docType package
 #' @author Boris Demeshev 
-
+#' @import stringi stringr stringdist reshape2 dplyr zoo ggplot2 erer
 
 
 .onLoad <- function(libname = find.package("bigr"), pkgname = "bigr") {
@@ -74,6 +74,40 @@ translit <- function(x) {
   return(stri_trans_general(x,"Russian-Latin/BGN"))
 }
 
+#' Change encoding of cyrillic text from "utf8" to "cp1251"
+#'
+#' This function changes encoding of a vector from "utf8" to "cp1251"
+#' This function applies changes only to character and factor variables
+#' 
+#' @param x the vector of cyrillic characters
+#' @return reencoded vector
+#' @export
+#' @examples
+#' utf2cp0("привет")
+utf2cp0 <- function(x) {
+  ans <- x
+  if (is.character(x) | is.factor(x))
+    ans <- iconv(x,from="utf8",to="cp1251")
+  return(ans)
+}
+
+#' Change encoding of cyrillic text from "utf8" to "cp1251"
+#'
+#' This function changes encoding of a vector or data.frame from "utf8" to "cp1251"
+#' 
+#' @param x the vector or data.frame of cyrillic characters
+#' @return reencoded vector or data.frame
+#' @export
+#' @examples
+#' utf2cp("привет")
+utf2cp <- function(x) {
+  ans <- x
+  if (is.character(x) | is.factor(x))
+    ans <- utf2cp0(x)
+  if (is.data.frame(x)) 
+    for (i in 1:ncol(ans)) ans[,i] <- utf2cp0(ans[,i])        
+  return(ans)
+}
 
 #' Create base correspondance table from vector of etalon cathegory names
 #'

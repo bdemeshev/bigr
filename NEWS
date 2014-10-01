@@ -1,0 +1,18 @@
+# bigr 0.1
+
+## New functions
+
+* `rus2num()` 
+
+* `str_stand()` 
+
+* `translit()`
+
+* `ct_start()`
+
+* `excel2date()`
+
+* `unite_factors()`
+
+* `utf2cp()`
+
