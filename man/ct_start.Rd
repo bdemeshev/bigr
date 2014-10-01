@@ -3,7 +3,7 @@
 \alias{ct_start}
 \title{Create base correspondance table from vector of etalon cathegory names}
 \usage{
-ct_start(etal_cat)
+ct_start(etal_cat, add_original = FALSE)
 }
 \arguments{
 \item{x}{the vector of etalon cathegory names}

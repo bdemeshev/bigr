@@ -52,10 +52,10 @@ rus2num <- function(x) {
 #' @examples
 #' str_stand("пРивет!")
 str_stand <- function(z) {
-  z %>% tolower() %>% str_trim() %>% 
+  z %>% tolower() %>% 
     stri_trans_general(id = "Russian-Latin/BGN" ) %>% 
     str_replace_all("[[:punct:]]"," ") %>%
-    str_replace_all(" +"," ") %>% return()  
+    str_replace_all(" +"," ") %>% str_trim() %>% return()  
 }
 
 
@@ -118,13 +118,54 @@ utf2cp <- function(x) {
 #' @export
 #' @examples
 #' ct_start(c("Iphone","Samsung","HTC"))
-ct_start <- function(etal_cat) {
-  ct <- data.frame(in_cat=etal_cat,out_cat=etal_cat)
-  ct_add <- ct %>% mutate(in_cat=str_stand(in_cat))
-  ct <- rbind_list(ct,ct_add) %>% unique() 
-  return(ct)
+ct_start <- function (etal_cat, add_original=FALSE) {
+    ct_trivial <- data.frame(in_cat = etal_cat, out_cat = etal_cat)
+    ans <- ct_trivial %>% mutate(in_cat = str_stand(in_cat)) %>% unique()
+    if (add_original) ans <- rbind_list(ct_trivial,ans) %>% unique()
+    return(ans)
+  }
+
+#' Find unmatched user responsed given correspondance table
+#'
+#' This function 
+#' 
+#' @param z the vector of user responces
+#' @param ct actual correspondance table
+#' @return vector of unmatched user responses
+#' @export
+#' @examples
+#' ct_unmatched(z,ct)
+ct_unmatched <- function(z,ct) {
+  # z - вектор пользовательских ответов
+  # ct - таблица соответствий со столбцами in_cat, out_cat
+  return(z[!z %in% ct$in_cat])
 }
 
+#' Create base correspondance table from user responses and actual correspondance table
+#'
+#' This function 
+#' 
+#' @param z the vector of user responces
+#' @param ct actual correspondance table
+#' @param max_dist maximum Levenstein distance
+#' @return additional lines for correspondance table
+#' @export
+#' @examples
+#' ct_new_block(z,ct)
+ct_new_block <- function(z,ct,max_dist=1) {
+  ct$erunda <- 0
+  d <- data.frame(user_ans=z,erunda=0)
+  
+  d_ct <- left_join(d,ct,by="erunda") # формируем все возможные пары (user_ans,in_cat)
+  ct_add <- d_ct %>% 
+    mutate(dist=stringdist(str_stand(user_ans),in_cat)) %>% # считаем расстояние
+    filter(dist<=max_dist) %>% # отбираем те строки, где расстояние меньше max_dist
+    select(in_cat=user_ans,out_cat) %>% # отбираем переменные
+    unique() # удаляем дубли строк
+  ct_add <- anti_join(ct_add,ct,by="in_cat") # только новые соответствия
+  
+  return(ct_add)
+}
 
 
 #' Convert excel numeric date encoding to date
