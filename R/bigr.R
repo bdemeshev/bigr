@@ -3,7 +3,7 @@
 #' @name bigr
 #' @docType package
 #' @author Boris Demeshev 
-#' @import stringi stringr stringdist reshape2 dplyr zoo ggplot2 erer
+#' @import stringr stringdist reshape2 dplyr zoo ggplot2 erer
 
 
 .onLoad <- function(libname = find.package("bigr"), pkgname = "bigr") {
