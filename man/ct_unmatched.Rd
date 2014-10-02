@@ -8,7 +8,7 @@ ct_unmatched(z, ct)
 \arguments{
 \item{z}{the vector of user responces}
 
-\item{ct}{actual correspondance table}
+\item{ct}{actual correspondance table with in_cat and out_cat variables}
 }
 \value{
 vector of unmatched user responses

@@ -229,14 +229,12 @@ ct_start <- function (etal_cat, add_original=FALSE) {
 #' This function finds unmatched user responses given correspondance table
 #' 
 #' @param z the vector of user responces
-#' @param ct actual correspondance table
+#' @param ct actual correspondance table with in_cat and out_cat variables
 #' @return vector of unmatched user responses
 #' @export
 #' @examples
 #' ct_unmatched(z,ct)
 ct_unmatched <- function(z,ct) {
-  # z - вектор пользовательских ответов
-  # ct - таблица соответствий со столбцами in_cat, out_cat
   return(z[!z %in% ct$in_cat])
 }
 
@@ -257,8 +255,10 @@ ct_new_block <- function(z,ct,max_dist=1) {
   
   d_ct <- left_join(d,ct,by="erunda") # формируем все возможные пары (user_ans,in_cat)
   ct_add <- d_ct %>% 
-    mutate(dist=stringdist(str_stand(user_ans),in_cat)) %>% # считаем расстояние
+    mutate(dist=stringdist(user_ans,in_cat)) %>% # считаем расстояние
     filter(dist<=max_dist) %>% # отбираем те строки, где расстояние меньше max_dist
+    group_by(user_ans) %>% # находим наилучшие соответствия
+    filter(dist==min(dist)) %>% 
     select(in_cat=user_ans,out_cat) %>% # отбираем переменные
     unique() # удаляем дубли строк
   ct_add <- anti_join(ct_add,ct,by="in_cat") # только новые соответствия
