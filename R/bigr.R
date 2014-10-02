@@ -58,9 +58,9 @@ rus2num <- function(x) {
 #' @export
 #' @examples
 #' str_stand("пРивет!")
-str_stand <- function(z) {
+str_stand <- function(z,translit=TRUE) {
+  if(translit) z <- stri_trans_general(z, id = "Russian-Latin/BGN" )
   z %>% tolower() %>% 
-    stri_trans_general(id = "Russian-Latin/BGN" ) %>% 
     str_replace_all("[[:punct:]]"," ") %>%
     str_replace_all(" +"," ") %>% str_trim() %>% return()  
 }
