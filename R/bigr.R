@@ -20,6 +20,19 @@
   options(stringsAsFactors = FALSE)
 }
 
+#' Modified read.csv with stringsAsFactors = FALSE
+#' 
+#' Modified read.csv with stringsAsFactors = FALSE
+#' 
+#' @param ... parameters passed to read.csv
+#' @return data.frame
+#' @export
+#' @examples
+#' read_csv("myfile.csv")
+read_csv <- function(...) {
+  return(read.csv(...,stringsAsFactors = FALSE))
+}
+
 
 
 
