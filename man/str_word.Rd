@@ -3,12 +3,14 @@
 \alias{str_word}
 \title{Get specific word from a vector of character sentences}
 \usage{
-str_word(x, num = 1)
+str_word(x, num = 1, remove.duplicate = TRUE)
 }
 \arguments{
 \item{x}{the vector of cyrillic characters}
 
-\item{num}{the number of word, negative numbers mean "from the end of sentence"}
+\item{num}{the number (numbers) of word, negative numbers mean "from the end of sentence"}
+
+\item{remove.duplicate}{logical, indicates whether the same word should be reported once or twice}
 }
 \value{
 data frame of words with numbers

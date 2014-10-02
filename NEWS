@@ -1,3 +1,14 @@
+# bigr 0.4
+
+## New functions
+
+* `str_words2sent()`
+
+* `str_sent2words()`
+
+* `str_word()` can now take vector of nums as argument
+
+
 # bigr 0.3
 
 ## New functions

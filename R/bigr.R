@@ -1,9 +1,13 @@
 #' bigr
 #'
+#' This package is designed for BIG company. It loads some popular packages by default.
+#' To see the list of available functions click on index below!
+#' Be happy, don't worry :)
+#'
 #' @name bigr
 #' @docType package
 #' @author Boris Demeshev 
-#' @import stringr stringdist reshape2 dplyr zoo ggplot2 erer
+#' @import stringr stringdist reshape2 dplyr zoo ggplot2 erer devtools
 
 
 .onLoad <- function(libname = find.package("bigr"), pkgname = "bigr") {
@@ -15,6 +19,7 @@
   library("dplyr")
   library("zoo")
   
+  library("devtools")
   library("ggplot2")
   library("erer")
   options(stringsAsFactors = FALSE)
@@ -60,36 +65,84 @@ str_stand <- function(z) {
     str_replace_all(" +"," ") %>% str_trim() %>% return()  
 }
 
+#' Convert vector of sentences to a data.frame of separate words
+#' 
+#' Convert vector of sentences to a data.frame of separate words
+#' The output is a data.frame with 3 variables:
+#' word, word_n (number of word), sent_n (number of sentence)
+#' 
+#' @param x the vector of sentences
+#' @param cleanup logical indicates whether to remove punctuation and some other cleanup
+#' @return data.frame with 3 variables: word, word_n (number of word), sent_n (number of sentence)
+#' @export
+#' @examples
+#' str_sent2words(c("привет","Маша, это я, Дубровский"))
+str_sent2words <- function(x, cleanup=TRUE) {
+  if (cleanup) x <- x %>% str_replace_all("[[:punct:]]"," ") %>%
+    str_replace_all(" +"," ") %>% str_trim()
+  d <- x %>% str_split(pattern = " ") %>% melt() %>% 
+    group_by(L1) %>% mutate(n=row_number()) %>% select(word=value,sent_n=L1,word_n=n)
+  return(d)    
+}
+
+
+#' Convert data.frame of separate words to a vector of sentences
+#' 
+#' Convert data.frame with 3 variables: 
+#' word, word_n (number of word), sent_n (number of sentence)
+#' To a vector of sentences
+#' 
+#' @param x the data.frame with 3 variables: word, word_n (number of word), sent_n (number of sentence)
+#' @param sep the separator for words 
+#' @return a vector of sentences
+#' @export
+#' @examples
+#' str_words2sent(str_sent2words(c("привет","Маша, это я, Дубровский")))
+str_words2sent <- function(d,sep=" ") {
+  d2 <- d %>% group_by(sent_n) %>% arrange(word_n) %>%
+    summarise(sentence=paste(word,collapse = sep)) 
+  return(d2$sentence)
+}
+
+
+
+
+
+
 #' Get specific word from a vector of character sentences
 #'
 #' This function uses the transliteration tradition where "й" goes to "y"
 #' 
 #' @param x the vector of cyrillic characters
-#' @param num the number of word, negative numbers mean "from the end of sentence"
+#' @param num the number (numbers) of word, negative numbers mean "from the end of sentence"
+#' @param remove.duplicate logical, indicates whether the same word should be reported once or twice
 #' @return data frame of words with numbers
 #' @export
 #' @examples
 #' str_word(c("привет","Маша, это я, Дубровский"))
-str_word <- function(x, num=1) {  
-  # little clean up
-  x <- x %>% str_replace_all("[[:punct:]]"," ") %>%
-    str_replace_all(" +"," ") %>% str_trim()
-  
+str_word <- function(x, num=1, remove.duplicate=TRUE) {  
+  # little clean up 
   # split into words and transform to data frame:
-  d <- x %>% str_split(pattern = " ") %>% melt() %>% 
-    group_by(L1) %>% mutate(n=row_number())
+  d <- str_sent2words(x)
   
-  # filter the correct word
-  if (num>0) semi <- d %>% filter(n==num)
-  if (num<0) semi <- d %>% group_by(L1) %>% filter(n==max(n)+1+num)
+  # filter the correct words
+  # from the beginning (positive num's)
+  semi_plus <- d %>% filter(word_n %in% num[num>0])
+  # from the end (negative num's)
+  semi_minus <- d %>% group_by(sent_n) %>% filter((word_n-max(word_n)) %in% (1+num[num<0]))
+  
+  semi <- rbind_list(semi_plus,semi_minus) 
+  if (remove.duplicate) semi <- unique(semi)
   
   # if word is missing add NA
-  ans <- d %>% select(L1) %>% unique() %>% left_join(semi %>% filter(!value==""))
-  # filter is needed to take care of special case when x="" and 
-  # split returns "" instead of NA
-  return(as.character(ans$value))
+  ans <- d %>% select(sent_n) %>% unique() %>% left_join(semi %>% filter(!word==""))
+  # (!) when x="" str_split returns "" (not NA)
+  
+  # replace NA by ""
+  ans$word[is.na(ans$word)] <- ""
+  
+  return(str_words2sent(ans))
 }
-
 
 #' Transliterate cyrillic text
 #'
@@ -173,7 +226,7 @@ ct_unmatched <- function(z,ct) {
 
 #' Create additional correspondance table from user responses and actual correspondance table
 #'
-#' This function 
+#' This function uses Levenstein distance to create additional entries for correspondance table
 #' 
 #' @param z the vector of user responces
 #' @param ct actual correspondance table

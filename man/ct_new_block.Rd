@@ -16,7 +16,7 @@ ct_new_block(z, ct, max_dist = 1)
 additional lines for correspondance table
 }
 \description{
-This function
+This function uses Levenstein distance to create additional entries for correspondance table
 }
 \examples{
 ct_new_block(z,ct)

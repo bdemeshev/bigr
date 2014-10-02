@@ -9,7 +9,9 @@
 .onLoad(libname = find.package("bigr"), pkgname = "bigr")
 }
 \description{
-bigr
+This package is designed for BIG company. It loads some popular packages by default.
+To see the list of available functions click on index below!
+Be happy, don't worry :)
 }
 \author{
 Boris Demeshev
