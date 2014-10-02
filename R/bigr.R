@@ -17,7 +17,9 @@
   
   library("ggplot2")
   library("erer")
+  options(stringsAsFactors = FALSE)
 }
+
 
 
 
