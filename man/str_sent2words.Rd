@@ -3,12 +3,14 @@
 \alias{str_sent2words}
 \title{Convert vector of sentences to a data.frame of separate words}
 \usage{
-str_sent2words(x, cleanup = TRUE)
+str_sent2words(x, cleanup = TRUE, sep = " ")
 }
 \arguments{
 \item{x}{the vector of sentences}
 
 \item{cleanup}{logical indicates whether to remove punctuation and some other cleanup}
+
+\item{sep}{separator of words, space by default}
 }
 \value{
 data.frame with 3 variables: word, word_n (number of word), sent_n (number of sentence)

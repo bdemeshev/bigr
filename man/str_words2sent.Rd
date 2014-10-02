@@ -6,7 +6,7 @@
 str_words2sent(d, sep = " ")
 }
 \arguments{
-\item{sep}{the separator for words}
+\item{sep}{the separator for words, space by default}
 
 \item{x}{the data.frame with 3 variables: word, word_n (number of word), sent_n (number of sentence)}
 }

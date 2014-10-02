@@ -3,9 +3,11 @@
 \alias{str_stand}
 \title{Standartize character vector}
 \usage{
-str_stand(z)
+str_stand(z, translit = TRUE)
 }
 \arguments{
+\item{translit}{logical whether we transliterate vector into latin}
+
 \item{x}{the character vector}
 }
 \value{

@@ -54,6 +54,7 @@ rus2num <- function(x) {
 #' elimination of punctiation, transliteration, removing capitalization
 #' 
 #' @param x the character vector
+#' @param translit logical whether we transliterate vector into latin
 #' @return standartized character vector
 #' @export
 #' @examples
@@ -73,14 +74,15 @@ str_stand <- function(z,translit=TRUE) {
 #' 
 #' @param x the vector of sentences
 #' @param cleanup logical indicates whether to remove punctuation and some other cleanup
+#' @param sep separator of words, space by default
 #' @return data.frame with 3 variables: word, word_n (number of word), sent_n (number of sentence)
 #' @export
 #' @examples
 #' str_sent2words(c("привет","Маша, это я, Дубровский"))
-str_sent2words <- function(x, cleanup=TRUE) {
+str_sent2words <- function(x, cleanup=TRUE,sep=" ") {
   if (cleanup) x <- x %>% str_replace_all("[[:punct:]]"," ") %>%
     str_replace_all(" +"," ") %>% str_trim()
-  d <- x %>% str_split(pattern = " ") %>% melt() %>% 
+  d <- x %>% str_split(pattern = sep) %>% melt() %>% 
     group_by(L1) %>% mutate(n=row_number()) %>% select(word=value,sent_n=L1,word_n=n)
   return(d)    
 }
@@ -93,7 +95,7 @@ str_sent2words <- function(x, cleanup=TRUE) {
 #' To a vector of sentences
 #' 
 #' @param x the data.frame with 3 variables: word, word_n (number of word), sent_n (number of sentence)
-#' @param sep the separator for words 
+#' @param sep the separator for words, space by default
 #' @return a vector of sentences
 #' @export
 #' @examples
@@ -104,7 +106,21 @@ str_words2sent <- function(d,sep=" ") {
   return(d2$sentence)
 }
 
-
+#' Order words in a vector of sentences
+#' 
+#' This function order words in each sentence of a character vector
+#' 
+#' @param x the vector of sentences
+#' @return a vector of sentences with ordered words
+#' @export
+#' @examples
+#' str_orderwords(c("привет","Маша, это я, Дубровский"))
+str_orderwords <- function(x, sep=" ") {
+  d <- str_sent2words(x, sep=sep) # convert to data.frame
+  d <- d %>% group_by(sent_n) %>% arrange(word) %>% mutate(word_n=row_number())
+  str_words2sent(d, sep=sep) %>% # convert back to vector
+    return()
+}
 
 
 
