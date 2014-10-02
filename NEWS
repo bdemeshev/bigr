@@ -1,3 +1,8 @@
+# bigr 0.5
+
+* Updated `ct_new_block()`. Now only best matches are left.
+
+
 # bigr 0.4
 
 ## New functions
