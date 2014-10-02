@@ -58,7 +58,35 @@ str_stand <- function(z) {
     str_replace_all(" +"," ") %>% str_trim() %>% return()  
 }
 
-
+#' Get specific word from a vector of character sentences
+#'
+#' This function uses the transliteration tradition where "й" goes to "y"
+#' 
+#' @param x the vector of cyrillic characters
+#' @param num the number of word, negative numbers mean "from the end of sentence"
+#' @return data frame of words with numbers
+#' @export
+#' @examples
+#' str_word(c("привет","Маша, это я, Дубровский"))
+str_word <- function(x, num=1) {  
+  # little clean up
+  x <- x %>% str_replace_all("[[:punct:]]"," ") %>%
+    str_replace_all(" +"," ") %>% str_trim()
+  
+  # split into words and transform to data frame:
+  d <- x %>% str_split(pattern = " ") %>% melt() %>% 
+    group_by(L1) %>% mutate(n=row_number())
+  
+  # filter the correct word
+  if (num>0) semi <- d %>% filter(n==num)
+  if (num<0) semi <- d %>% group_by(L1) %>% filter(n==max(n)+1+num)
+  
+  # if word is missing add NA
+  ans <- d %>% select(L1) %>% unique() %>% left_join(semi %>% filter(!value==""))
+  # filter is needed to take care of special case when x="" and 
+  # split returns "" instead of NA
+  return(as.character(ans$value))
+}
 
 
 #' Transliterate cyrillic text
@@ -69,8 +97,8 @@ str_stand <- function(z) {
 #' @return transliterated vector
 #' @export
 #' @examples
-#' translit("привет")
-translit <- function(x) {
+#' str_translit("привет")
+str_translit <- function(x) {
   return(stri_trans_general(x,"Russian-Latin/BGN"))
 }
 
@@ -99,8 +127,8 @@ utf2cp0 <- function(x) {
 #' @return reencoded vector or data.frame
 #' @export
 #' @examples
-#' utf2cp("привет")
-utf2cp <- function(x) {
+#' str_utf2cp("привет")
+str_utf2cp <- function(x) {
   ans <- x
   if (is.character(x) | is.factor(x))
     ans <- utf2cp0(x)
@@ -125,9 +153,9 @@ ct_start <- function (etal_cat, add_original=FALSE) {
     return(ans)
   }
 
-#' Find unmatched user responsed given correspondance table
+#' Find unmatched user responses given correspondance table
 #'
-#' This function 
+#' This function finds unmatched user responses given correspondance table
 #' 
 #' @param z the vector of user responces
 #' @param ct actual correspondance table
@@ -141,7 +169,7 @@ ct_unmatched <- function(z,ct) {
   return(z[!z %in% ct$in_cat])
 }
 
-#' Create base correspondance table from user responses and actual correspondance table
+#' Create additional correspondance table from user responses and actual correspondance table
 #'
 #' This function 
 #' 

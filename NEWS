@@ -1,3 +1,11 @@
+# bigr 0.3
+
+## New functions
+
+* `str_word()`
+
+## Standartisation. All string functions now have str prefix.
+
 # bigr 0.2
 
 ## New functions
