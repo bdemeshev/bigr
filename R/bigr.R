@@ -1,6 +1,8 @@
-#' bigr
+#' small bigr package
 #'
-#' This package is designed for BIG company. It loads some popular packages by default.
+#' This package is designed for easy life of BIG company. 
+#' 
+#' It loads some popular packages by default.
 #' To see the list of available functions click on index below!
 #' Be happy, don't worry :)
 #'
@@ -8,7 +10,7 @@
 #' @docType package
 #' @author Boris Demeshev 
 #' @import stringr stringdist reshape2 dplyr zoo ggplot2 erer devtools
-
+NULL
 
 .onLoad <- function(libname = find.package("bigr"), pkgname = "bigr") {
   # warning("One bear with balalaika and vodka has joined your R session!")
@@ -213,13 +215,15 @@ str_utf2cp <- function(x) {
 #' This function creates basic correspondance table from vector of etalon cathegory names
 #' 
 #' @param x the vector of etalon cathegory names
+#' @param add_original whether we include trivial correspondance etalon <-> etalon
+#' @param translit logical whether we transliterate while standartising responses
 #' @return data.frame with basic correspondance table 
 #' @export
 #' @examples
 #' ct_start(c("Iphone","Samsung","HTC"))
-ct_start <- function (etal_cat, add_original=FALSE) {
+ct_start <- function (etal_cat, add_original=FALSE,translit=TRUE) {
     ct_trivial <- data.frame(in_cat = etal_cat, out_cat = etal_cat)
-    ans <- ct_trivial %>% mutate(in_cat = str_stand(in_cat)) %>% unique()
+    ans <- ct_trivial %>% mutate(in_cat = str_stand(in_cat,translit=translit)) %>% unique()
     if (add_original) ans <- rbind_list(ct_trivial,ans) %>% unique()
     return(ans)
   }
@@ -256,15 +260,40 @@ ct_new_block <- function(z,ct,max_dist=1) {
   d_ct <- left_join(d,ct,by="erunda") # формируем все возможные пары (user_ans,in_cat)
   ct_add <- d_ct %>% 
     mutate(dist=stringdist(user_ans,in_cat)) %>% # считаем расстояние
-    filter(dist<=max_dist) %>% # отбираем те строки, где расстояние меньше max_dist
+    filter(dist<=max_dist)  # отбираем те строки, где расстояние меньше max_dist
+  ct_add <- ct_add %>%
     group_by(user_ans) %>% # находим наилучшие соответствия
     filter(dist==min(dist)) %>% 
     select(in_cat=user_ans,out_cat) %>% # отбираем переменные
     unique() # удаляем дубли строк
-  ct_add <- anti_join(ct_add,ct,by="in_cat") # только новые соответствия
+  ct_add <- ct_add[!ct_add$in_cat %in% ct$in_cat,] # только новые соответствия
+  # anti_join(ct_add,ct,by="in_cat") #  found multiple encodings in character string
   
   return(ct_add)
 }
+
+#' Lucky guy function
+#'
+#' This function tries to create a final correspondance table 
+#' starting from a vector of user answers and a vector of etalons
+#' 
+#' The Levenstein distance is used. When to matches give the same distance 
+#' the first one is returned. Warning: for lucky guys only!
+#' 
+#' @param user_ans the vector of user responces
+#' @param etalon the vector of etalon cathegories
+#' @param translit logical whether to do transliteration
+#' @return pretty correspondance table if you are a lucky guy
+#' @export
+#' @examples
+#' ct_luckyguy(user_ans,etalon,translit = FALSE)
+ct_luckyguy <- function(user_ans,etalon,...) {
+  ct <- ct_start(etalon,...)
+  ct_new_block(user_ans,ct,Inf) %>% group_by(in_cat) %>% 
+    mutate(temp=row_number()) %>% filter(temp==1) %>% select(in_cat,out_cat) %>%
+    rbind_list(ct) %>% filter(in_cat %in% user_ans) %>% return()
+}
+
 
 
 #' Convert excel numeric date encoding to date
@@ -278,7 +307,7 @@ ct_new_block <- function(z,ct,max_dist=1) {
 #' @examples
 #' excel2date(12345)
 excel2date <- function(x) {
-  ans <- as.Date(as.POSIXct((bir-25569)*86400, tz="GMT", origin="1970-01-01"))
+  ans <- as.Date(as.POSIXct((x-25569)*86400, tz="GMT", origin="1970-01-01"))
   return(ans)  
 }
 

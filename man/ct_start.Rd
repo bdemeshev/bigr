@@ -3,9 +3,13 @@
 \alias{ct_start}
 \title{Create base correspondance table from vector of etalon cathegory names}
 \usage{
-ct_start(etal_cat, add_original = FALSE)
+ct_start(etal_cat, add_original = FALSE, translit = TRUE)
 }
 \arguments{
+\item{add_original}{whether we include trivial correspondance etalon <-> etalon}
+
+\item{translit}{logical whether we transliterate while standartising responses}
+
 \item{x}{the vector of etalon cathegory names}
 }
 \value{

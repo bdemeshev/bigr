@@ -7,4 +7,15 @@ Author: Boris Demeshev
 Maintainer: Boris Demeshev <boris.demeshev@gmail.com>
 Description: This package contains functions useful for solving frequent
     practical tasks of BIG company.
+Imports:
+    dplyr,
+    ggvis,
+    erer,
+    zoo,
+    reshape2,
+    ggplot2,
+    devtools,
+    stringi,
+    stringr,
+    stringdist
 License: MIT
