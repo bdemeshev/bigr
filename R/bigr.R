@@ -283,15 +283,39 @@ ct_new_block <- function(z,ct,max_dist=1) {
 #' @param user_ans the vector of user responces
 #' @param etalon the vector of etalon cathegories
 #' @param translit logical whether to do transliteration
+#' @param algorithm 1 means that is max_dist is set to + infinity, 
+#' 2 means that iterative algorithm is used
+#' 1 is better for finding one-to-one correspondance, 
+#' 2 is better to find many-to-one correspondance
 #' @return pretty correspondance table if you are a lucky guy
 #' @export
 #' @examples
 #' ct_luckyguy(user_ans,etalon,translit = FALSE)
-ct_luckyguy <- function(user_ans,etalon,...) {
-  ct <- ct_start(etalon,...)
-  ct_new_block(user_ans,ct,Inf) %>% group_by(in_cat) %>% 
+#' ct_luckyguy(user_ans,ct_start)
+ct_luckyguy <- function(user_ans,etalon,algorithm = 1, ...) {
+  if (is.data.frame(etalon)) ct <- etalon else ct <- ct_start(etalon,...)
+  if (algorithm == 1) {
+  ans <- ct_new_block(user_ans,ct,Inf) %>% group_by(in_cat) %>% 
     mutate(temp=row_number()) %>% filter(temp==1) %>% select(in_cat,out_cat) %>%
-    rbind_list(ct) %>% filter(in_cat %in% user_ans) %>% return()
+    rbind_list(ct) %>% filter(in_cat %in% user_ans) 
+  }  
+  if (algorithm == 2) {
+    ans_unmatched <- ct_unmatched(user_ans,ct)
+    while (length(ans_unmatched)>0) {
+      md <- 1
+      ct_more <- ct_new_block(ans_unmatched,ct)
+      while (nrow(ct_more)==0) {
+        md <- md + 1
+        ct_more <- ct_new_block(ans_unmatched, ct, max_dist = md)
+      }
+      ct <- rbind_list(ct,ct_more)
+      ans_unmatched <- ct_unmatched(ans_unmatched,ct)
+    } 
+    ans <- ct %>% filter(in_cat %in% user_ans) %>% group_by(in_cat) %>% 
+      mutate(n=row_number()) %>% filter(n==1) %>% select(in_cat,out_cat)
+  }
+    
+  return(ans)
 }
 
 

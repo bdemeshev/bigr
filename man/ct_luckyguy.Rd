@@ -3,12 +3,17 @@
 \alias{ct_luckyguy}
 \title{Lucky guy function}
 \usage{
-ct_luckyguy(user_ans, etalon, ...)
+ct_luckyguy(user_ans, etalon, algorithm = 1, ...)
 }
 \arguments{
 \item{user_ans}{the vector of user responces}
 
 \item{etalon}{the vector of etalon cathegories}
+
+\item{algorithm}{1 means that is max_dist is set to + infinity,
+2 means that iterative algorithm is used
+1 is better for finding one-to-one correspondance,
+2 is better to find many-to-one correspondance}
 
 \item{translit}{logical whether to do transliteration}
 }
@@ -25,5 +30,6 @@ the first one is returned. Warning: for lucky guys only!
 }
 \examples{
 ct_luckyguy(user_ans,etalon,translit = FALSE)
+ct_luckyguy(user_ans,ct_start)
 }
 
